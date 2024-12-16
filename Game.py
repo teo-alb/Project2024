@@ -123,8 +123,8 @@ class Soldier(pygame.sprite.Sprite):
 
     def shoot(self):
         if self.shoot_timer == 0 and self.ammo > 0:
-            self.shoot_timer = 20
-            bullet = Bullet(self.rect.centerx + (0.4 * self.rect.size[0] * self.direction), self.rect.centery, self.direction)
+            self.shoot_timer = 35
+            bullet = Bullet(self.rect.centerx + (self.rect.size[0] //2 * self.direction), self.rect.centery, self.direction)
             bullet_group.add(bullet)
             #reduce ammo
             self.ammo -= 1
