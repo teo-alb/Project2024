@@ -22,8 +22,13 @@ FRAMERATE = 60
 #game variables
 GRAVITY = 0.6
 TILE_SIZE = 40
+<<<<<<< HEAD
 ROWS = 16
 COLUMNS = 150
+=======
+ROWS = 18
+COLUMNS = 145
+>>>>>>> 0993b6fd9706eda2a373a2bbe234f27f58d24d6f
 TILE_TYPES = 21
 level = 1
 
@@ -166,7 +171,11 @@ class Soldier(pygame.sprite.Sprite):
     def shoot(self):
         if self.shoot_timer == 0 and self.ammo > 0:
             self.shoot_timer = 20
+<<<<<<< HEAD
             bullet = Bullet(self.rect.centerx + (self.rect.size[0] //1.5 * self.direction), self.rect.centery , self.direction)
+=======
+            bullet = Bullet(self.rect.centerx + (self.rect.size[0] //2 * self.direction), self.rect.centery, self.direction)
+>>>>>>> 0993b6fd9706eda2a373a2bbe234f27f58d24d6f
             bullet_group.add(bullet)
 
             #reduce ammo
@@ -239,6 +248,10 @@ class Soldier(pygame.sprite.Sprite):
     def draw(self):
         screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0993b6fd9706eda2a373a2bbe234f27f58d24d6f
 class World():
 	def __init__(self):
 		self.obstacle_list = []
@@ -261,10 +274,17 @@ class World():
 						decoration = Decoration(img, x * TILE_SIZE, y * TILE_SIZE)
 						decoration_group.add(decoration)
 					elif tile == 15:#player
+<<<<<<< HEAD
 						player = Soldier('Blue', x * TILE_SIZE, y * TILE_SIZE, 1.65, 5, 20, 5)
 						health_bar = HealthBar(10, 10, player.health, player.health)
 					elif tile == 16:#enemy
 						enemy = Soldier('Black', x * TILE_SIZE, y * TILE_SIZE, 1.65, 2, 20, 0)
+=======
+						player = Soldier('player', x * TILE_SIZE, y * TILE_SIZE, 1.65, 5, 20, 5)
+						health_bar = HealthBar(10, 10, player.health, player.health)
+					elif tile == 16:#enemy
+						enemy = Soldier('enemy', x * TILE_SIZE, y * TILE_SIZE, 1.65, 2, 20, 0)
+>>>>>>> 0993b6fd9706eda2a373a2bbe234f27f58d24d6f
 						enemy_group.add(enemy)
 					elif tile == 17:#ammo box
 						item_box = ItemBox('Ammo', x * TILE_SIZE, y * TILE_SIZE)
@@ -346,9 +366,13 @@ class HealthBar():
         self.health = health
         #calculate health ratio
         ratio = self.health / self.maximum_health
+<<<<<<< HEAD
         pygame.draw.rect(screen, BLACK, (self.x + 2, self.y - 2, 150, 24))
         pygame.draw.rect(screen, BLACK, (self.x - 2, self.y - 2, 150, 24))
 
+=======
+        pygame.draw.rect(screen, BLACK, (self.x - 2, self.y - 2, 150, 24))
+>>>>>>> 0993b6fd9706eda2a373a2bbe234f27f58d24d6f
         pygame.draw.rect(screen, RED, (self.x, self.y, 150, 20))
         pygame.draw.rect(screen, GREEN, (self.x, self.y, 150 * ratio, 20))
        
@@ -493,10 +517,36 @@ with open(f'level{level}_data.csv', newline='') as csvfile:
 		for y, tile in enumerate(row):
 			world_data[x][y] = int(tile)
 
+<<<<<<< HEAD
 world = World()
+=======
+player = Soldier('Blue', 200, 200, 3, 5, 20, 7)
+health_bar = HealthBar(10, 10, player.health, player.health)
+
+enemy = Soldier('Black', 400, 200, 3, 5, 20, 0)
+enemy_group.add(enemy)
+
+#creating empty list
+world_data = []
+for row in range(ROWS):
+	r = [-1] * COLUMNS
+	world_data.append(r)
+#load in level data and create world
+'''
+with open(f'xxxxx.csv', newline='') as csvfile:
+	reader = csv.reader(csvfile, delimiter=',')
+	for x, row in enumerate(reader):
+		for y, tile in enumerate(row):
+			world_data[x][y] = int(tile)
+'''
+>>>>>>> 0993b6fd9706eda2a373a2bbe234f27f58d24d6f
 
 player, health_bar = world.process_data(world_data)
 
+world = World()
+'''
+player, health_bar = world.process_data(world_data)
+'''
 running = True
 while running :
     
@@ -512,7 +562,11 @@ while running :
         screen.blit(bullet_img, (90 + (x * 10), 40))
     #show grenades
     draw_text('GRENADES: ', font, WHITE, 10, 60)
+<<<<<<< HEAD
     for x in range(player.grenades):
+=======
+    for x in range(player.ammo):
+>>>>>>> 0993b6fd9706eda2a373a2bbe234f27f58d24d6f
         screen.blit(grenade_img, (135 + (x * 15), 60))
 
 
