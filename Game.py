@@ -4,6 +4,15 @@ import random
 import csv
 
 pygame.init() #initialize pygame
+pygame.font.init()
+FONT = pygame.font.Font(None, 50)
+
+menu = True
+
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+GRAY = (100, 100, 100)
+BLUE = (0, 100, 255)
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = int(SCREEN_WIDTH * 0.8)
@@ -63,6 +72,15 @@ WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 BLACK = (0, 0, 0)
 
+MUSIC_FILE = "S31-Heavy Steroid Use.ogg"
+pygame.mixer.init()
+pygame.mixer.music.load(MUSIC_FILE)
+pygame.mixer.music.play(-1)
+
+# Options menu
+music_on = True
+volume = 0.5
+
 #font defination
 font = pygame.font.SysFont('Futura', 25)
 
@@ -75,6 +93,164 @@ def draw_background():
     screen.fill((BG_Color))
     pygame.draw.line(screen, RED, (0,300), (SCREEN_WIDTH, 300))
 
+class Button:
+    def __init__(self, text, pos, size, action):
+        self.text = text
+        self.pos = pos
+        self.size = size
+        self.action = action
+        self.rect = pygame.Rect(pos, size)
+        self.color = GRAY
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.color, self.rect)
+        label = FONT.render(self.text, True, WHITE)
+        label_rect = label.get_rect(center=self.rect.center)
+        screen.blit(label, label_rect)
+
+    def check_hover(self, mouse_pos):
+        self.color = BLUE if self.rect.collidepoint(mouse_pos) else GRAY
+
+    def check_click(self, mouse_pos):
+        if self.rect.collidepoint(mouse_pos):
+            return self.action
+        return None
+
+def main_menu():
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    pygame.display.set_caption("Main Menu")
+
+    buttons = [
+        Button("New Game", (300, 150), (200, 60), "run_game"),
+        Button("Options", (300, 250), (200, 60), "options"),
+        Button("Shop", (300, 350), (200, 60), "shop"),
+        Button("Quit", (300, 450), (200, 60), "quit")
+    ]
+
+    running = True
+    global menu
+    while running:
+        screen.fill(BLACK)
+        mouse_pos = pygame.mouse.get_pos()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                for button in buttons:
+                    action = button.check_click(mouse_pos)
+                    if action:
+                        if action == "run_game":
+                            menu = False
+                            run_game()  # Switch to game loop
+                        elif action == "options":
+                            options_menu()
+                        elif action == "shop":
+                            shop_menu()
+                        elif action == "quit":
+                            pygame.quit()
+                            sys.exit()
+
+        for button in buttons:
+            button.check_hover(mouse_pos)
+            button.draw(screen)
+
+        pygame.display.flip()
+
+def options_menu():
+    global music_on, volume
+
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    pygame.display.set_caption("Options Menu")
+
+    toggle_music_button = Button("Music: ON" if music_on else "Music: OFF", (300, 200), (200, 60), "toggle_music")
+    slider_rect = pygame.Rect(300, 300, 200, 10)
+    handle_rect = pygame.Rect(300 + int(volume * 200) - 5, 295, 10, 20)
+    back_button = Button("Back", (300, 400), (200, 60), "back")
+
+    running = True
+    while running:
+        screen.fill(BLACK)
+        mouse_pos = pygame.mouse.get_pos()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if back_button.check_click(mouse_pos) == "back":
+                    return
+
+                action = toggle_music_button.check_click(mouse_pos)
+                if action == "toggle_music":
+                    music_on = not music_on
+                    toggle_music_button.text = "Music: ON" if music_on else "Music: OFF"
+                    if music_on:
+                        pygame.mixer.music.unpause()
+                    else:
+                        pygame.mixer.music.pause()
+                elif handle_rect.collidepoint(mouse_pos):
+                    volume = (mouse_pos[0] - slider_rect.x) / slider_rect.width
+                    volume = max(0, min(1, volume))
+                    pygame.mixer.music.set_volume(volume)
+
+            elif event.type == pygame.MOUSEMOTION and pygame.mouse.get_pressed()[0]:
+                if slider_rect.collidepoint(mouse_pos):
+                    volume = (mouse_pos[0] - slider_rect.x) / slider_rect.width
+                    volume = max(0, min(1, volume))
+                    pygame.mixer.music.set_volume(volume)
+
+        toggle_music_button.check_hover(mouse_pos)
+        toggle_music_button.draw(screen)
+
+        back_button.check_hover(mouse_pos)
+        back_button.draw(screen)
+
+        # Draw slider
+        pygame.draw.rect(screen, GRAY, slider_rect)
+        handle_rect.x = slider_rect.x + int(volume * slider_rect.width) - handle_rect.width // 2
+        pygame.draw.rect(screen, WHITE, handle_rect)
+
+        pygame.display.flip()
+
+def shop_menu():
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    pygame.display.set_caption("Shop Menu")
+
+    back_button = Button("Back", (300, 500), (200, 60), "back")
+
+    items = [
+        Button("Item 1", (300, 100), (200, 60), "item1"),
+        Button("Item 2", (300, 200), (200, 60), "item2"),
+        Button("Item 3", (300, 300), (200, 60), "item3"),
+    ]
+
+    running = True
+    while running:
+        screen.fill(BLACK)
+        mouse_pos = pygame.mouse.get_pos()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if back_button.check_click(mouse_pos) == "back":
+                    return
+
+                for item in items:
+                    if item.check_click(mouse_pos):
+                        print(f"Purchased {item.text}!")
+
+        for item in items:
+            item.check_hover(mouse_pos)
+            item.draw(screen)
+
+        back_button.check_hover(mouse_pos)
+        back_button.draw(screen)
+
+        pygame.display.flip()
 
 class Soldier(pygame.sprite.Sprite):
     def __init__(self, type, x, y, SCALING, speed, ammo, grenades):
@@ -509,6 +685,130 @@ world = World()
 '''
 player, health_bar = world.process_data(world_data)
 '''
+
+def run_game():
+    running = True
+    global menu
+    
+    global shoot
+    global grenade
+    global moving_left
+    global moving_right
+    global grenade_thrown
+
+    while running:
+
+        if menu:
+            new_game_button, quit_button = main_menu()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if new_game_button.collidepoint(event.pos):
+                        menu = False  # Start the game
+                    elif quit_button.collidepoint(event.pos):
+                        running = False
+        else:  
+            clock.tick(FRAMERATE)
+
+            draw_background()
+            world.draw()
+            #show player health
+            health_bar.draw(player.health)
+            #show ammo
+            draw_text('AMMO: ', font, WHITE, 10, 35)
+            for x in range(player.ammo):
+                screen.blit(bullet_img, (90 + (x * 10), 40))
+            #show grenades
+            draw_text('GRENADES: ', font, WHITE, 10, 60)
+            for x in range(player.ammo):
+                screen.blit(grenade_img, (135 + (x * 15), 60))
+
+
+
+            player.update()
+            player.draw()
+
+            for enemy in enemy_group:
+                enemy.update()
+                enemy.draw()
+
+            #Update and draw groups 
+            bullet_group.update()
+            grenade_group.update()
+            explosion_group.update()
+            item_box_group.update()
+            decoration_group.update()
+            water_group.update()
+            exit_group.update()
+            bullet_group.draw(screen)
+            grenade_group.draw(screen)
+            explosion_group.draw(screen)
+            item_box_group.draw(screen)
+            decoration_group.draw(screen)
+            water_group.draw(screen)
+            exit_group.draw(screen)
+
+
+
+            #update player actions
+            if player.alive:
+                #shooting bullets
+                if shoot:
+                    player.shoot()
+                #throwing the grenades
+                elif grenade and grenade_thrown == False and player.grenades > 0:
+                    grenade = Grenade(player.rect.centerx + (0.5 * player.rect.size[0] * player.direction),\
+                            player.rect.top, player.direction)
+                    grenade_group.add(grenade)
+                    #Using grenades
+                    player.grenades -= 1
+                    grenade_thrown = True
+
+                if player.in_air:
+                    player.update_action(2) #2 for jump
+                elif moving_left or moving_right :
+                    player.update_action(1) #1 is running
+                else :
+                    player.update_action(0) #0 is idle
+                player.move(moving_left, moving_right)
+
+            for event in pygame.event.get(): #The Events Hnadler
+                #quit game
+                if event.type == pygame.QUIT:
+                    running = False
+                #Keyboard presses
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_a:
+                        moving_left = True
+                    if event.key == pygame.K_d:
+                        moving_right = True
+                    if event.key == pygame.K_SPACE:
+                        shoot = True
+                    if event.key == pygame.K_e:
+                        grenade = True
+                    if event.key == pygame.K_w and player.alive:
+                        player.jump = True
+                    if event.key == pygame.K_ESCAPE:
+                        running = False
+
+                    #for releasing the keyboard
+                if event.type == pygame.KEYUP:
+                    if event.key == pygame.K_a:
+                        moving_left = False
+                    if event.key == pygame.K_d:
+                        moving_right = False
+                    if event.key == pygame.K_SPACE:
+                        shoot = False
+                    if event.key == pygame.K_e:
+                        grenade = False
+                        grenade_thrown = False
+
+            pygame.display.update()
+
+run_game()
+
+'''
 running = True
 while running :
     
@@ -580,7 +880,7 @@ while running :
         #quit game
         if event.type == pygame.QUIT:
             running = False
-        '''Keyboard Inputs'''
+        
         #Keyboard presses
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_a:
@@ -609,5 +909,5 @@ while running :
                 grenade_thrown = False
 
     pygame.display.update()
-
+'''
 pygame.quit()
