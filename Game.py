@@ -10,7 +10,7 @@ pygame.init() # Initialize pygame
 SCREEN_INFO = pygame.display.Info()
 SCREEN_WIDTH = SCREEN_INFO.current_w
 SCREEN_HEIGHT = SCREEN_INFO.current_h
-SCALING = 2.5 # Used for images
+SCALING = 4 # Used for images
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT),pygame.FULLSCREEN)
 pygame.display.set_caption('3B-SHOOTER')
@@ -95,7 +95,8 @@ def draw_background():
 
 class Soldier(pygame.sprite.Sprite):
     def __init__(self, type, x, y, SCALING, speed, ammo, grenades):
-        pygame.sprite.Sprite.__init__(self)  # Inherit functionality from sprite class, some built-in code
+        pygame.sprite.Sprite.__init__(self)  # Inherit functionality from sprite class
+        scale_factor = 0.5
         self.alive = True
         self.type = type
         self.speed = speed
@@ -114,8 +115,9 @@ class Soldier(pygame.sprite.Sprite):
         self.frame_index = 0
         self.action = 0  # 0 : idle
         self.update_time = pygame.time.get_ticks()
+        #ai variables
         self.move_counter = 0
-        self.vision = pygame.Rect(0, 0, 150, 20)
+        self.vision = pygame.Rect(0, 0, 250, 20)
         self.idling = False
         self.idling_counter = 0
 
@@ -128,23 +130,30 @@ class Soldier(pygame.sprite.Sprite):
             num_of_frames = len(os.listdir(f'{self.type}Soldier/{animation}'))  # Creates a list of the files in a directory
             for i in range(num_of_frames):
                 img = pygame.image.load(f'{self.type}Soldier/{animation}/tile{i}.png').convert_alpha()
-                img = pygame.transform.scale(img, (int(img.get_width() * SCALING), int(img.get_height()) * SCALING))
+                # Scale the image
+                img = pygame.transform.scale(img, (int(img.get_width() * SCALING), int(img.get_height() * SCALING)))
                 temp_list.append(img)
             self.animation_list.append(temp_list)
 
+        # Set the image and update the rect with scaled dimensions
         self.image = self.animation_list[self.action][self.frame_index]
-        self.rect = self.image.get_rect()  # Takes size of the img and creates a rectangle
-        self.rect.center = (x, y)
-
+        self.rect = self.image.get_rect()  # Create the rect based on the scaled image
         self.width = self.image.get_width()
         self.height = self.image.get_height()
+        self.rect.center = (x, y)  # Set initial position
 
     def update(self):
         self.update_animation()
         self.if_alive()
+
+        if self.rect.top > SCREEN_HEIGHT:
+            self.health = 0
+            self.if_alive()
         # Updating cooldown
         if self.shoot_timer > 0:
             self.shoot_timer -= 1
+
+        
 
     def move(self, moving_left, moving_right):
         # Reset move variables
@@ -164,7 +173,7 @@ class Soldier(pygame.sprite.Sprite):
 
         # Jump
         if self.jump == True and self.in_air == False:
-            self.velocity_y = -10
+            self.velocity_y = -15
             self.jump = False
             self.in_air = True
 
@@ -174,6 +183,7 @@ class Soldier(pygame.sprite.Sprite):
             self.velocity_y = 10
         dy += self.velocity_y
 
+        #chec for collision
         # Check collision with floor
         for tile in world.obstacle_list:
             # Check collision in x direction
@@ -223,6 +233,17 @@ class Soldier(pygame.sprite.Sprite):
 
             # Reduce ammo
             self.ammo -= 1
+    
+    def shoot(self):
+        if self.shoot_timer == 0 and self.ammo > 0:
+            self.shoot_timer = 20
+
+            bullet = Bullet(self.rect.centerx + (self.rect.size[0] // 1.5 * self.direction), self.rect.centery, self.direction)
+
+            bullet_group.add(bullet)
+
+            # Reduce ammo
+            self.ammo -= 1
 
     def ai(self):
         if self.alive and player.alive:
@@ -259,6 +280,8 @@ class Soldier(pygame.sprite.Sprite):
         #scroll 
         self.rect.x += screen_scroll
 
+
+
     def update_animation(self):
         # Update animation
         ANIMATION_TIMER = 100
@@ -292,6 +315,8 @@ class Soldier(pygame.sprite.Sprite):
 
     def draw(self):
         screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
+        #pygame.draw.rect(screen, RED, self.rect, 2)  # Draw the rectangle in red
+        #screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
 
 
 class World():
@@ -363,6 +388,7 @@ class Water(pygame.sprite.Sprite):
 
     def update(self):
         self.rect.x += screen_scroll
+
 
 
 class Exit(pygame.sprite.Sprite):
@@ -628,6 +654,7 @@ while running :
     player.draw()
     
     for enemy in enemy_group:
+        enemy.ai()
         enemy.update()
         enemy.draw()
 
