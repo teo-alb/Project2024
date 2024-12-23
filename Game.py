@@ -1,16 +1,18 @@
 import pygame # Importing the pygame module
 import os
+import sysconfig
 import random
 import csv
 import math
 
 pygame.init() # Initialize pygame
 
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = int(SCREEN_WIDTH * 0.8)
+SCREEN_INFO = pygame.display.Info()
+SCREEN_WIDTH = SCREEN_INFO.current_w
+SCREEN_HEIGHT = SCREEN_INFO.current_h
 SCALING = 2.5 # Used for images
 
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT),pygame.FULLSCREEN)
 pygame.display.set_caption('3B-SHOOTER')
 
 # Game variables
@@ -23,7 +25,7 @@ FRAMERATE = 60
 # Game variables
 GRAVITY = 0.5
 SCROLL_THRESH = 200
-TILE_SIZE = 40
+TILE_SIZE = SCREEN_HEIGHT // 16
 ROWS = 16
 COLUMNS = 150
 TILE_TYPES = 21
@@ -581,9 +583,6 @@ world = World()
 
 player = Soldier('Blue', 200, 200, 3, 5, 20, 7)
 health_bar = HealthBar(10, 10, player.health, player.health)
-
-enemy = Soldier('Black', 400, 200, 3, 5, 20, 0)
-enemy_group.add(enemy)
 
 #creating empty list
 world_data = []
