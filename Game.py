@@ -49,7 +49,7 @@ grenade_thrown = False
 
 
 #Music and sounds
-pygame.mixer.music.load('Audios/Trouble-in-Town.mp3')
+pygame.mixer.music.load('Audios/Cat-Burglars.mp3')
 pygame.mixer.music.set_volume(0.5)
 pygame.mixer.music.play(-1, 0.0, 6000)
 jump_fx = pygame.mixer.Sound('Audios/audio_jump.wav')
