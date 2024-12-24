@@ -60,13 +60,11 @@ grenade_fx = pygame.mixer.Sound('Audios/audio_grenade.wav')
 grenade_fx.set_volume(0.5)
 
 
-
 # Load Images
 #Buttons
 start_img = pygame.image.load('icons/start_btn.png').convert_alpha()
 exit_img = pygame.image.load('icons/exit_btn.png').convert_alpha()
 restart_img = pygame.image.load('icons/restart_btn.png').convert_alpha()
-
 
 # Background
 pine1_img = pygame.image.load('background/pine1.png').convert_alpha()
@@ -205,8 +203,6 @@ class Soldier(pygame.sprite.Sprite):
         if self.shoot_timer > 0:
             self.shoot_timer -= 1
 
-        
-
     def move(self, moving_left, moving_right):
         # Reset move variables
         screen_scroll = 0
@@ -300,7 +296,6 @@ class Soldier(pygame.sprite.Sprite):
             #Shooting sound
             shot_fx.play()
     
-
     def ai(self):
         if self.alive and player.alive:
             if self.idling == False and random.randint(1, 200) == 1:
@@ -335,8 +330,6 @@ class Soldier(pygame.sprite.Sprite):
 
         #scroll 
         self.rect.x += screen_scroll
-
-
 
     def update_animation(self):
         # Update animation
@@ -446,7 +439,6 @@ class Water(pygame.sprite.Sprite):
         self.rect.x += screen_scroll
 
 
-
 class Exit(pygame.sprite.Sprite):
     def __init__(self, img, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -549,7 +541,6 @@ class Grenade(pygame.sprite.Sprite):
         self.height = self.image.get_height()
         self.direction = direction
 
-
     def update(self):
         self.rect.x += screen_scroll
         self.velocity_y += GRAVITY
@@ -637,6 +628,7 @@ class Explosion(pygame.sprite.Sprite):
             else:
                 self.image = self.images[self.frame_index]
 
+
 class ScreenFade():
     def __init__(self, direction, colour, speed):
         self.direction = direction
@@ -660,17 +652,15 @@ class ScreenFade():
         return fade_complete
 
 
+
 #Creating screen fades
 intro_fade = ScreenFade(1, BLACK, 4)
 death_fade = ScreenFade(2, PINK, 4)
-
 
 #Creating Buttons
 start_button = Button.Button(SCREEN_WIDTH // 2 - 90, SCREEN_HEIGHT // 2 - 130, start_img, 1)
 exit_button = Button.Button(SCREEN_WIDTH // 2 - 70, SCREEN_HEIGHT // 2 + 60, exit_img, 1)
 restart_button = Button.Button(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 50, restart_img, 2)
-
-
 
 #Creating sprite groups
 enemy_group = pygame.sprite.Group()
@@ -749,7 +739,6 @@ while running :
         for x in range(player.grenades):
             screen.blit(grenade_img, (135 + (x * 15), 60))
 
-
         player.update()
         player.draw()
         
@@ -774,14 +763,12 @@ while running :
         water_group.draw(screen)
         exit_group.draw(screen)
         
-        
         #Intro
         if start_intro == True:
             if intro_fade.fade():
                 start_intro = False
                 intro_fade.fade_counter = 0
 
-        
         #update player actions
         if player.alive:
             #shooting bullets
