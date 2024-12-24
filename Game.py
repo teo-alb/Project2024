@@ -823,7 +823,7 @@ while running :
             bg_scroll -= screen_scroll
             #Checking if the player completed the level
             if level_complete:
-                if level == 1:  # After completing level 3, show the congratulations screen
+                if level == 3:  # After completing level 3, show the congratulations screen
                     congratulations()  # Show the congratulatory screen
                     running = False  # Stop the current game loop to return to the main menu
                 else:
