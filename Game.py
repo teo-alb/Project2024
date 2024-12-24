@@ -707,6 +707,38 @@ world = World()
 
 player, health_bar = world.process_data(world_data)
 
+def congratulations():
+    screen.fill((0, 0, 0))  # Fill the screen with black (or any color for the background)
+    
+    # Load and display the congratulatory background image
+    congrats_bg = pygame.image.load('background/congratulations.png')  # Make sure to have a background image file
+    congrats_bg = pygame.transform.scale(congrats_bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
+    screen.blit(congrats_bg, (0, 0))  # Display the background at position (0, 0)
+    
+    # Display the congratulations message
+    draw_text('CONGRATULATIONS!', font, WHITE, SCREEN_WIDTH // 2 - 120, SCREEN_HEIGHT // 3)
+    draw_text('You completed Level 3!', font, WHITE, SCREEN_WIDTH // 2 - 140, SCREEN_HEIGHT // 2)
+    draw_text('Press Enter to exit or ESC to return to the main menu', font, WHITE, SCREEN_WIDTH // 2 - 200, SCREEN_HEIGHT // 1.5)
+
+    pygame.display.update()
+
+    waiting_for_input = True
+    while waiting_for_input:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:  # Press Enter to exit
+                    pygame.quit()  # Close the game
+                    return
+                elif event.key == pygame.K_ESCAPE:  # Press Escape to return to the main menu
+                    global start_game
+                    start_game = False  # Set the flag to False to trigger the main menu
+                    return
+
+
 
 running = True
 while running :
@@ -793,19 +825,24 @@ while running :
             bg_scroll -= screen_scroll
             #Checking if the player completed the level
             if level_complete:
-                start_intro = True
-                level += 1
-                bg_scroll = 0 
-                world_data = reset_level()
-                if level <= MAX_LEVELS:
-                    #load in level data and create world
-                    with open(f'level{level}_data.csv', newline='') as csvfile:
-                        reader = csv.reader(csvfile, delimiter=',')
-                        for x, row in enumerate(reader):
-                            for y, tile in enumerate(row):
-                                world_data[x][y] = int(tile)
-                    world = World()
-                    player, health_bar = world.process_data(world_data)
+                if level == 1:  # After completing level 3, show the congratulations screen
+                    congratulations()  # Show the congratulatory screen
+                    running = False  # Stop the current game loop to return to the main menu
+                else:
+                    # Continue to the next level
+                    start_intro = True
+                    level += 1
+                    bg_scroll = 0
+                    world_data = reset_level()
+                    if level <= MAX_LEVELS:
+                        # Load in the new level data and create the world for the next level
+                        with open(f'level{level}_data.csv', newline='') as csvfile:
+                            reader = csv.reader(csvfile, delimiter=',')
+                            for x, row in enumerate(reader):
+                                for y, tile in enumerate(row):
+                                    world_data[x][y] = int(tile)
+                        world = World()
+                        player, health_bar = world.process_data(world_data)
         else:
             screen_scroll = 0
             if death_fade.fade():
