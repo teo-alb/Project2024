@@ -49,7 +49,7 @@ grenade_thrown = False
 
 
 #Music and sounds
-pygame.mixer.music.load('Audios/Trouble-in-Town.mp3')
+pygame.mixer.music.load('Audios/Cat-Burglars.mp3')
 pygame.mixer.music.set_volume(0.5)
 pygame.mixer.music.play(-1, 0.0, 6000)
 jump_fx = pygame.mixer.Sound('Audios/audio_jump.wav')
@@ -163,7 +163,6 @@ class Soldier(pygame.sprite.Sprite):
         #ai variables
         self.move_counter = 0
         self.vision = pygame.Rect(0, 0, 150, 20)
-        self.vision = pygame.Rect(0, 0, 250, 20)
         self.idling = False
         self.idling_counter = 0
 
@@ -299,7 +298,7 @@ class Soldier(pygame.sprite.Sprite):
     def ai(self):
         if self.alive and player.alive:
             if self.idling == False and random.randint(1, 200) == 1:
-                self.update_action(0)
+                self.update_action(0) #Because 0 is for idling innit
                 self.idling = True
                 self.idling_counter = 50
             # Check if AI near the player
@@ -320,6 +319,7 @@ class Soldier(pygame.sprite.Sprite):
                     self.move_counter += 1
                     # Update AI vision as enemy moves
                     self.vision.center = (self.rect.centerx + 75 * self.direction, self.rect.centery)
+                    
                     if self.move_counter > TILE_SIZE:
                         self.direction *= -1
                         self.move_counter *= -1
@@ -468,9 +468,9 @@ class ItemBox(pygame.sprite.Sprite):
                 if player.health > player.maximum_health:
                     player.health = player.maximum_health
             elif self.item_type == 'Ammo':
-                player.ammo += 15
+                player.ammo += 10
             elif self.item_type == 'Grenade':
-                player.grenades += 3
+                player.grenades += 5
             #to delete item box
             self.kill()
 
@@ -486,9 +486,7 @@ class HealthBar():
         self.health = health
         #calculate health ratio
         ratio = self.health / self.maximum_health
-
-        pygame.draw.rect(screen, BLACK, (self.x + 2, self.y - 2, 150, 24))
-        pygame.draw.rect(screen, BLACK, (self.x - 2, self.y - 2, 150, 24))
+        pygame.draw.rect(screen, BLACK, (self.x - 2, self.y - 2, 154, 24))
 
         pygame.draw.rect(screen, RED, (self.x, self.y, 150, 20))
         pygame.draw.rect(screen, GREEN, (self.x, self.y, 150 * ratio, 20))
@@ -707,6 +705,38 @@ world = World()
 
 player, health_bar = world.process_data(world_data)
 
+def congratulations():
+    screen.fill((0, 0, 0))  # Fill the screen with black (or any color for the background)
+    
+    # Load and display the congratulatory background image
+    congrats_bg = pygame.image.load('background/congratulations.png')  # Make sure to have a background image file
+    congrats_bg = pygame.transform.scale(congrats_bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
+    screen.blit(congrats_bg, (0, 0))  # Display the background at position (0, 0)
+    
+    # Display the congratulations message
+    draw_text('CONGRATULATIONS!', font, WHITE, SCREEN_WIDTH // 2 - 120, SCREEN_HEIGHT // 3)
+    draw_text('You completed Level 3!', font, WHITE, SCREEN_WIDTH // 2 - 140, SCREEN_HEIGHT // 2)
+    draw_text('Press Enter to exit or ESC to return to the main menu', font, WHITE, SCREEN_WIDTH // 2 - 200, SCREEN_HEIGHT // 1.5)
+
+    pygame.display.update()
+
+    waiting_for_input = True
+    while waiting_for_input:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:  # Press Enter to exit
+                    pygame.quit()  # Close the game
+                    return
+                elif event.key == pygame.K_ESCAPE:  # Press Escape to return to the main menu
+                    global start_game
+                    start_game = False  # Set the flag to False to trigger the main menu
+                    return
+
+
 
 running = True
 while running :
@@ -793,19 +823,24 @@ while running :
             bg_scroll -= screen_scroll
             #Checking if the player completed the level
             if level_complete:
-                start_intro = True
-                level += 1
-                bg_scroll = 0 
-                world_data = reset_level()
-                if level <= MAX_LEVELS:
-                    #load in level data and create world
-                    with open(f'level{level}_data.csv', newline='') as csvfile:
-                        reader = csv.reader(csvfile, delimiter=',')
-                        for x, row in enumerate(reader):
-                            for y, tile in enumerate(row):
-                                world_data[x][y] = int(tile)
-                    world = World()
-                    player, health_bar = world.process_data(world_data)
+                if level == 3:  # After completing level 3, show the congratulations screen
+                    congratulations()  # Show the congratulatory screen
+                    running = False  # Stop the current game loop to return to the main menu
+                else:
+                    # Continue to the next level
+                    start_intro = True
+                    level += 1
+                    bg_scroll = 0
+                    world_data = reset_level()
+                    if level <= MAX_LEVELS:
+                        # Load in the new level data and create the world for the next level
+                        with open(f'level{level}_data.csv', newline='') as csvfile:
+                            reader = csv.reader(csvfile, delimiter=',')
+                            for x, row in enumerate(reader):
+                                for y, tile in enumerate(row):
+                                    world_data[x][y] = int(tile)
+                        world = World()
+                        player, health_bar = world.process_data(world_data)
         else:
             screen_scroll = 0
             if death_fade.fade():
