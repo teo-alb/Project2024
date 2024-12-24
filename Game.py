@@ -163,7 +163,6 @@ class Soldier(pygame.sprite.Sprite):
         #ai variables
         self.move_counter = 0
         self.vision = pygame.Rect(0, 0, 150, 20)
-        self.vision = pygame.Rect(0, 0, 250, 20)
         self.idling = False
         self.idling_counter = 0
 
@@ -299,7 +298,7 @@ class Soldier(pygame.sprite.Sprite):
     def ai(self):
         if self.alive and player.alive:
             if self.idling == False and random.randint(1, 200) == 1:
-                self.update_action(0)
+                self.update_action(0) #Because 0 is for idling innit
                 self.idling = True
                 self.idling_counter = 50
             # Check if AI near the player
@@ -320,6 +319,7 @@ class Soldier(pygame.sprite.Sprite):
                     self.move_counter += 1
                     # Update AI vision as enemy moves
                     self.vision.center = (self.rect.centerx + 75 * self.direction, self.rect.centery)
+                    
                     if self.move_counter > TILE_SIZE:
                         self.direction *= -1
                         self.move_counter *= -1
@@ -468,9 +468,9 @@ class ItemBox(pygame.sprite.Sprite):
                 if player.health > player.maximum_health:
                     player.health = player.maximum_health
             elif self.item_type == 'Ammo':
-                player.ammo += 15
+                player.ammo += 10
             elif self.item_type == 'Grenade':
-                player.grenades += 3
+                player.grenades += 5
             #to delete item box
             self.kill()
 
@@ -486,9 +486,7 @@ class HealthBar():
         self.health = health
         #calculate health ratio
         ratio = self.health / self.maximum_health
-
-        pygame.draw.rect(screen, BLACK, (self.x + 2, self.y - 2, 150, 24))
-        pygame.draw.rect(screen, BLACK, (self.x - 2, self.y - 2, 150, 24))
+        pygame.draw.rect(screen, BLACK, (self.x - 2, self.y - 2, 154, 24))
 
         pygame.draw.rect(screen, RED, (self.x, self.y, 150, 20))
         pygame.draw.rect(screen, GREEN, (self.x, self.y, 150 * ratio, 20))
